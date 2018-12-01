@@ -204,7 +204,7 @@ var nameGuts = '';
 function allDone() {
 	var cmd = '/Users/adammalone/canvas/timtv '+imgDir+' '+nameGuts
 	console.log(cmd);
-    const ls = spawn('/Users/adammalone/canvas/timtv', [imgDir, nameGuts]);
+    const ls = spawn('/Users/adammalone/canvas/timtv', [imgDir, nameGuts, fun.toString()]);
 
     ls.stdout.on('data', (data) => {
       console.log(`stdout: ${data}`);
@@ -328,6 +328,6 @@ function loop(inc,num,filenameLeft,fn) {
 	  }
 	});
 }
-outLoop(64);
+outLoop(12);
 
 
