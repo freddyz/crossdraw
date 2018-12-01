@@ -1,0 +1,7 @@
+movs
+gifs
+images
+coverimages
+*.swp
+*.swo
+.DS_Store

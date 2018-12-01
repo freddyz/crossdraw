@@ -1,0 +1,5 @@
+#!/bin/bash
+/usr/local/bin/ffmpeg -f image2 -i $1/$2_%d.png /Users/adammalone/canvas/gifs/$2.gif
+/usr/local/bin/ffmpeg -f image2 -i $1/$2_%d.png -vcodec libx264 -s 500x500 -pix_fmt yuv420p /Users/adammalone/canvas/movs/$2.mp4
+cp $1/$2_0.png /Users/adammalone/canvas/coverimages/$2.png
+rm -f $1/$2_*
