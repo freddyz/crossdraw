@@ -186,16 +186,15 @@ function amd() {
 
 function fun(ctx,inc) {var a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z,ni=100,nx=500,ny=500;rra=Math.random(),rrb=Math.random(),rrc=Math.random(),rrd=Math.random(),rre=Math.random();rrf=Math.random();rrg=Math.random();
 for(x = 0; x < nx; x++) {for(y=0;y<ny;y++){r = Math.hypot(x-250,y-250);t=Math.atan2(x-250,y-250);
-a=0;
-b=0;
-c=Math.hypot(x-250,y-120);
-d=c+r-250;
-e=127*Math.random()*(1.1-sin(inc));
-f=rgb(255-e);
+a=sin(x/30+inc)-sin(y/25-inc);
+b=sin(r/30+inc)+sin(r/35-inc);
+c=com.sigmoid(7*sin(inc));
+d=com.sigmoid(5*sin(inc));
+e=a*c + b*(1-c);
+f=rgb(e*240*(1-c),e*45,e*255*c);
 ctx.fillStyle=f;
 ctx.fillRect(x,y,1,1);
 }}}
-
 
 
 var imgDir = '/Users/adammalone/canvas/images';
@@ -290,7 +289,7 @@ function outLoop(num) {
 	var now = new Date(),
     prefix = 'cdr',
 	timestamp = dateFormat(now, "yyyy-mm-dd_[HH.MM.ss]"),
-	rndstring = randomString(16,'almtreekirtuvgeoposr'),
+	rndstring = randomString(16,'abcdefghijklmnopqrstuvwxyz'),
 	filename,
     fn;
     
@@ -328,6 +327,6 @@ function loop(inc,num,filenameLeft,fn) {
 	  }
 	});
 }
-outLoop(12);
+outLoop(96);
 
 
