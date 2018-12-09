@@ -9,7 +9,7 @@ var Canvas = require('canvas-prebuilt')
   , canvas = new Canvas(w, h)
   , ctx = canvas.getContext('2d');
 var rootdir = '/Users/adammalone/canvas/';
-var sin = Math.sin,cos=Math.cos,abs=Math.abs,random=Math.random,hypot=Math.hypot,atan2=Math.atan2,pow=Math.pow,exp=Math.exp,log=Math.log,com=com.common();
+var sin = Math.sin,cos=Math.cos,abs=Math.abs,random=Math.random,hypot=Math.hypot,atan2=Math.atan2,pow=Math.pow,exp=Math.exp,log=Math.log,PI=Math.PI,com=com.common();
 function sincolor(a_val, a_params, a_extrema, a_alpha) {
             var nr = 2,
             ng = 3,
@@ -172,30 +172,18 @@ function multiSeed(num,fn) {
 		}
 	}
 }
-function amd() {
-    var rp = [];
-    for(var i = 0; i < 26; i ++) {
-        rp.push(Math.random());
-    }
-    return function(ctx,inc) {
-        return monkeydraw.apply(null,[ctx,inc].concat(rp));
-    }
-}
 
-
-
-function fun(ctx,inc) {var a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z,ni=100,nx=500,ny=500;rra=Math.random(),rrb=Math.random(),rrc=Math.random(),rrd=Math.random(),rre=Math.random();rrf=Math.random();rrg=Math.random();
+function fun(ctx,inc,A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z) {var a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z,ni=100,nx=500,ny=500;rra=Math.random(),rrb=Math.random(),rrc=Math.random(),rrd=Math.random(),rre=Math.random();rrf=Math.random();rrg=Math.random();
 for(x = 0; x < nx; x++) {for(y=0;y<ny;y++){r = Math.hypot(x-250,y-250);t=Math.atan2(x-250,y-250);
-a=sin(x/30+inc)-sin(y/25-inc);
-b=sin(r/30+inc)+sin(r/35-inc);
-c=com.sigmoid(7*sin(inc));
-d=com.sigmoid(5*sin(inc));
-e=a*c + b*(1-c);
-f=rgb(e*240*(1-c),e*45,e*255*c);
+a=exp(15*sin(inc/2 + 1));
+b=exp(15*sin(inc/2));
+c=sin(5*(t-PI/10)+inc);
+d=sin(6*(t-PI/12)-inc);
+e=1000*pow(sin(r/20+inc),4);
+f=ecolor(0,[b,a,b],[c*c*100,100*d*d,e]);
 ctx.fillStyle=f;
 ctx.fillRect(x,y,1,1);
 }}}
-
 
 var imgDir = '/Users/adammalone/canvas/images';
 var postFix = '.png';
@@ -220,18 +208,20 @@ function allDone() {
 }
 //monkeydraw assumes these paramters are sent with random values
 function monkeydraw(ctx,inc,rra,rrb,rrc,rrd,rre,rrf,rrg,rrh,rri,rrj,rrk,rrl,rrm,rrn) {var a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z,ni=100,nx=300,ny=5;
-    ctx.strokeStyle="white";
+    ctx.strokeStyle=sincolor(rrf*22);
     ctx.clearRect(0,0,4000,4000);
     ctx.beginPath();
     var xx,yy;
-    var omega = [rra,rrb,rrc].map(function(item) {return Math.floor(item*7);});
+    nx = Math.floor(Math.random()*1000);
+
+    var omega = [rra,rrb,rrc].map(function(item) {return Math.floor(item*17);});
     var phi = [rrd,rre,rrf].map(function(item) {return 2*Math.PI*item});
     var k = [rra,(rrf+rrb)/2,(rre-rrc)/2].map(function(item) {return 3-Math.floor(item*5);});
     for(x = 0; x < nx; x++) {
         var xp=x/nx;
         var xt = 2*Math.PI*xp;
         r = omega.reduce(function(last,item,dex) {
-            return last + 20*Math.sin(item*xt+phi[dex]+inc*k[dex]);
+            return last + 10*Math.sin(item*xt+phi[dex]+inc*k[dex]);
         },100);
         xx=250+r*Math.cos(xt);
         yy=250+r*Math.sin(xt);
@@ -276,15 +266,24 @@ ctx.fillRect(x,y,1,1);
 //fun is the default running mode.  paste the crossdraw functions in here
 
 
-
-
+function findfun() {
+    var arg = args[2];
+    var funToUse = (arg && argmap.hasOwnProperty(arg)) ? argmap[arg] : fun
+    var rp = [];
+    for(var i = 0; i < 26; i ++) {
+        rp.push(Math.random());
+    }
+    return function(ctx,inc) {
+        return funToUse.apply(null,[ctx,inc].concat(rp));
+    }
+}
+function jimdraw() {}
 var argmap = {
-    r:function(rest) {
-        return amd();
-    },
-
+    r:monkeydraw,
+    f: fun
 
 }
+
 function outLoop(num) {
 	var now = new Date(),
     prefix = 'cdr',
@@ -296,10 +295,9 @@ function outLoop(num) {
     nameGuts = prefix + '_' +timestamp + '_' + rndstring;
     filename = imgDir + '/'+nameGuts+'_';
 
-    fn = argmap.hasOwnProperty(args[2]) ? argmap[args[2]].apply(null,args)  : fun;
+    fn = findfun();
 
-    console.log(JSON.stringify(args));
-
+    //fn = fun;
     loop(0,num,filename,fn);
 }
 
@@ -311,7 +309,7 @@ function loop(inc,num,filenameLeft,fn) {
 	  	var out = fs.createWriteStream(filename),
 	  	  stream = canvas.pngStream();
 
-	  fn(ctx,inc*2*Math.PI/num);
+	  fn(  ctx,inc*2*Math.PI/num);
 
 	stream.on('data', function(chunk){
 	  out.write(chunk);
