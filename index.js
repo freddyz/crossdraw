@@ -1,6 +1,10 @@
 var w=500,h=500;
 const args = process.argv;
 var fs = require('fs'), 
+ express = require('express'),
+ app = express(),
+ port = 3000,
+ bodyParser = require('body-parser'),
 spawn = require('child_process').spawn,
 com = require('./js/common.js'),
 dateFormat = require('dateformat');
@@ -72,12 +76,12 @@ function rgb(r,g,b,a) {
 	return 'rgba('+Math.round(r)+','+Math.round(g)+','+Math.round(b)+','+a+')';
 }
 function ss(x, n) {
-                var out = 0;
-                for (var i = 1; i <= n; i++) {
-                    out += Math.sin(i * x);
-                }
-                return out;
-            };
+    var out = 0;
+    for (var i = 1; i <= n; i++) {
+        out += Math.sin(i * x);
+    }
+    return out;
+};
 function sinest(x, arr,phi,amp,fn) {
     arr = arr || [1];
     phi = phi||[0];
@@ -175,12 +179,12 @@ function multiSeed(num,fn) {
 
 function fun(ctx,inc,A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z) {var a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z,ni=100,nx=500,ny=500;rra=Math.random(),rrb=Math.random(),rrc=Math.random(),rrd=Math.random(),rre=Math.random();rrf=Math.random();rrg=Math.random();
 for(x = 0; x < nx; x++) {for(y=0;y<ny;y++){r = Math.hypot(x-250,y-250);t=Math.atan2(x-250,y-250);
-a=exp(15*sin(inc/2 + 1));
-b=exp(15*sin(inc/2));
-c=sin(5*(t-PI/10)+inc);
-d=sin(6*(t-PI/12)-inc);
-e=1000*pow(sin(r/20+inc),4);
-f=ecolor(0,[b,a,b],[c*c*100,100*d*d,e]);
+a=0;
+b=0;
+c=0;
+d=8;
+e=sin(inc+5*exp(sin(r/30+inc)+sin(t*4+inc+2*sin(t*4-inc-r/22)))-inc);
+f=rgb(255*(1-e));
 ctx.fillStyle=f;
 ctx.fillRect(x,y,1,1);
 }}}
@@ -266,8 +270,13 @@ ctx.fillRect(x,y,1,1);
 //fun is the default running mode.  paste the crossdraw functions in here
 
 
-function findfun() {
+function findfun(fnName) {
+    var argmap = {
+        r:monkeydraw,
+        f: fun
+    }
     var arg = args[2];
+    arg = fnName;
     var funToUse = (arg && argmap.hasOwnProperty(arg)) ? argmap[arg] : fun
     var rp = [];
     for(var i = 0; i < 26; i ++) {
@@ -277,14 +286,8 @@ function findfun() {
         return funToUse.apply(null,[ctx,inc].concat(rp));
     }
 }
-function jimdraw() {}
-var argmap = {
-    r:monkeydraw,
-    f: fun
 
-}
-
-function outLoop(num) {
+function outLoop(num,fnName) {
 	var now = new Date(),
     prefix = 'cdr',
 	timestamp = dateFormat(now, "yyyy-mm-dd_[HH.MM.ss]"),
@@ -295,7 +298,7 @@ function outLoop(num) {
     nameGuts = prefix + '_' +timestamp + '_' + rndstring;
     filename = imgDir + '/'+nameGuts+'_';
 
-    fn = findfun();
+    fn = findfun(fnName);
 
     //fn = fun;
     loop(0,num,filename,fn);
@@ -325,6 +328,19 @@ function loop(inc,num,filenameLeft,fn) {
 	  }
 	});
 }
-outLoop(96);
+
+/*app.use( express.json() );
+app.use(express.urlencoded( )); */
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+app.post('/', (req, res) => {
+    var functionString = req.body.functionString;
+    console.log(functionString);
+    eval(functionString);
+    res.send('Hello World!');
+    outLoop(96,'fun');
+})
+app.listen(port, () => console.log(`Example app listening on port ${port}!`))
+//outLoop(96);
 
 

@@ -9,9 +9,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "body-parser": "^1.18.3",
     "canvas-prebuilt": "^1.6.5-prerelease.1",
     "child_process": "^1.0.2",
     "dateformat": "^3.0.3",
+    "express": "^4.16.4",
     "fs": "0.0.1-security"
   }
 }
