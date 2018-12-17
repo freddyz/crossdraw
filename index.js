@@ -1,16 +1,16 @@
 var w=500,h=500;
 const args = process.argv;
-var fs = require('fs'), 
+var fs = require('fs-extra'), 
  express = require('express'),
- app = express(),
+ expressApp = express(),
  port = 3000,
  bodyParser = require('body-parser'),
 spawn = require('child_process').spawn,
 com = require('./js/common.js'),
 dateFormat = require('dateformat');
-var Canvas = require('canvas-prebuilt')
+var Canvas = require('canvas')
   , Image = Canvas.Image
-  , canvas = new Canvas(w, h)
+  , canvas = Canvas.createCanvas(w, h)
   , ctx = canvas.getContext('2d');
 var rootdir = '/Users/adammalone/canvas/';
 var sin = Math.sin,cos=Math.cos,abs=Math.abs,random=Math.random,hypot=Math.hypot,atan2=Math.atan2,pow=Math.pow,exp=Math.exp,log=Math.log,PI=Math.PI,com=com.common();
@@ -189,13 +189,11 @@ ctx.fillStyle=f;
 ctx.fillRect(x,y,1,1);
 }}}
 
-var imgDir = '/Users/adammalone/canvas/images';
+var imgDir = 'images';
 var postFix = '.png';
 var nameGuts = '';
 function allDone() {
-	var cmd = '/Users/adammalone/canvas/timtv '+imgDir+' '+nameGuts
-	console.log(cmd);
-    const ls = spawn('/Users/adammalone/canvas/timtv', [imgDir, nameGuts, fun.toString()]);
+    const ls = spawn('./timtv', [imgDir, nameGuts, fun.toString()]);
 
     ls.stdout.on('data', (data) => {
       console.log(`stdout: ${data}`);
@@ -328,19 +326,43 @@ function loop(inc,num,filenameLeft,fn) {
 	  }
 	});
 }
+function getLast() {
+    var cmd = '/Users/adammalone/canvas/catlastfunction';
+    console.log(cmd);
+    const ls = spawn('/Users/adammalone/canvas/catlastfunction');
 
-/*app.use( express.json() );
-app.use(express.urlencoded( )); */
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
-app.post('/', (req, res) => {
+    ls.stdout.on('data', (data) => {
+      console.log(`stdout: ${data}`);
+      eval(`fun=${data}`);
+      outLoop(96);
+    });
+
+    ls.stderr.on('data', (data) => {
+      console.log(`stderr: ${data}`);
+    });
+
+    ls.on('close', (code) => {
+      console.log(`child process exited with code ${code}`);
+    });
+
+}
+if(args[2]==="serve") {
+expressApp.use(bodyParser.urlencoded({ extended: false }));
+expressApp.use(bodyParser.json());
+expressApp.post('/', (req, res) => {
     var functionString = req.body.functionString;
     console.log(functionString);
-    eval(functionString);
-    res.send('Hello World!');
+    functionString && eval(functionString);
+    res.send('Going to loop this: '+functionString);
     outLoop(96,'fun');
 })
-app.listen(port, () => console.log(`Example app listening on port ${port}!`))
+expressApp.listen(port, () => console.log(`Example app listening on port ${port}!`));
+}
+
+else {
+
+getLast();
 //outLoop(96);
+}
 
 

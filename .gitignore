@@ -2,6 +2,8 @@ movs
 gifs
 images
 coverimages
+cdr-functions
+node_modules
 *.swp
 *.swo
 .DS_Store
