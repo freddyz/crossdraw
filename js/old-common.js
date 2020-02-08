@@ -91,102 +91,20 @@ var common = function() {
 		randomFromString: function(a_str) {
 			return a_str.charAt(Math.floor(a_str.length * Math.random()));
 		},
-		crossreplace: function(outerdict, innerdict, fn, defz) {
-			outerdict = outerdict || 'xyrtcbnaq';
-			innerdict = innerdict || 'abcdefg';
-			fn = fn || function(x, y) {
-				return x + y + '=' + com.randomFromArray(defz[x]) + ';';
-			};
-			defz = defz || {
-				x: com.randMul(10, com.randBetween, 250, 250),
-				y: com.randMul(10, com.randBetween, 250, 250),
-				r: com.randMul(10, com.randBetween, 10, 250),
-				t: com.randMul(10, com.randBetween, 1, 10),
-				c: com.randMul(10, function() {
-					return "\'" + com.randomRGB() + "\'";
-				}),
-				b: com.randMul(10, function() {
-					return Math.random() < 0.5;
-				}),
-				n: com.randMul(10, com.randBetween, 1, 40),
-				a: com.randMul(10, function() {
-					return 2 * Math.PI * Math.random();
-				}),
-				q: com.randMul(10, Math.random),
-				i: com.randMul(10, function() {
-					return 0
-				})
-			};
-			return outerdict.split('').map(function(x) {
-				return innerdict.split('').map(function(y) {
-					return fn(x, y);
-				}).join('');
-			}).join('\n')
-		},
-		dunnoyet: function(input, dict, indict, fn) {
-			input = input || '';
-			indict = indict || 'xyrtcbnaqpim';
-			dict = dict || com.lowercase;
-			fn = fn || com.randomFromArray;
-			var map = {
-				'x': 'z',
-				'y': 'z'
-			};
-			function ifmap(val) {
-				return map[val] || val;
-			}
-			var inmatch = '[' + indict + '][0-9]';
-			var re = new RegExp(inmatch, 'g');
-			var repz = {};
-			return input.replace(re, function(match) {
-				var matchsplit = match.split('');
-				var matchkey = ifmap(matchsplit[0]) + matchsplit[1];
-				var potentialRandom = fn(dict);
-				if (repz[matchkey]) {
-					potentialRandom = repz[matchkey];
-				}
-				else {
-					repz[matchkey] = potentialRandom;
-				}
-				return match[0] + potentialRandom;
-			});
-		},
-		rstring: function(num, corpus) {
+		rstring : function(num,corpus) {
 			// return a random string selected with replacement from corpus
 			// rstring(10) => 'cveuqbvueoq'
 			// rsting(3,'ABC') => 'BBA'
 			corpus = corpus || 'abcdefghijklmnopqrstuvwxyz';
 			var out = '';
-			for (var i = 0; i < num; i++) {
-				out += corpus[Math.floor(Math.random() * corpus.length)];
+			for(var i = 0; i < num; i++) {
+				out+=corpus[Math.floor(Math.random()*corpus.length)];
 			}
 			return out;
 		},
-		makeLookup:function(narr) {
-				var out = {};
-				for(var i = 0; i < narr.length; i++) {
-								out[narr[i]] = [];
-						var t = narr[i];
-								for(var j=0; j<narr[i]+1; j++) {
-												out[t][j] = [];
-												var tt = out[narr[i]][j];
-												out[t][j][0] = j/t;
-												out[t][j][1] = 2*Math.PI*tt[0];
-												out[t][j][2] = Math.random();
-												out[t][j][3] = 2*Math.PI*tt[2];
-												out[t][j][4] = Math.sin(tt[1]);
-												out[t][j][5] = Math.cos(tt[1]);
-												out[t][j][6] = Math.sin(tt[3]);
-												out[t][j][7] = Math.cos(tt[3]);
-								}    
-				}
-				return out;
-		},
 		randMul: function(a_num, fn) {
-			fn = fn || function() {
-				return com.randBetween(0, 10);
-			}
-			var out = [];
+			fn = fn || function() {return com.randBetween(0,10);}
+			var out = []
 			for (var i = 0; i < a_num; i++) {
 				out.push(fn.apply(null, Array.prototype.slice.call(arguments, 2)));
 			}
@@ -205,33 +123,6 @@ var common = function() {
 				out.push(fn(a_corpus));
 			}
 			return out;
-		},
-		hash : function(input, salt, len, dict) {
-			input = input || "";
-			len = len || 32;
-			dict = dict || com.b62;
-			salt = salt || "default-computerscare-salt";
-			var aa = 449;
-			var bb = 269;
-			var cc = 31817;
-			var dd = 397;
-			var ee = 503;
-			var output = "";
-			var chr;
-			var dex;
-			var salted = input+salt;
-			var runner = 0;
-			var nums = salted.split('').map(function(item,index) {
-				code = salted.charCodeAt(index);
-				runner = (runner + code*ee) % cc;
-				return code;
-			});
-			for(var i = 0; i < len; i++) {
-				dex = nums[(i + runner) % nums.length]*aa + bb*i + dd; 
-				chr = dict[dex% dict.length];
-				output += chr;	
-			}
-			return output; 
 		},
 		mseq: function(num, inc, start, mod) {
 			num = parseInt(num, 10) || 10;
@@ -393,15 +284,15 @@ var common = function() {
 			return 'rgba(' + rr + ',' + rg + ',' + rb + ',' + alph + ')';
 		},
 		//Better Sine Color
-		bscolor: function(x, omega, phi, alpha) {
-			var rr, gg, bb, aa;
-			omega = omega || [1, 2, 3];
-			phi = phi || [0, 0, 0];
-			aa = alpha || 1;
-			rr = 127 * (1 - Math.cos(x * omega[0] - phi[0])) | 0;
-			gg = 127 * (1 - Math.cos(x * omega[1] - phi[1])) | 0;
-			bb = 127 * (1 - Math.cos(x * omega[2] - phi[2])) | 0;
-			return 'rgba(' + rr + ',' + gg + ',' + bb + ',' + aa + ')';
+		bscolor : function(x,omega,phi,alpha) {
+			var rr,gg,bb,aa;
+			omega = omega || [1,2,3];
+			phi = phi || [0,0,0];
+			aa=alpha||1;
+			rr = 127*(1-Math.cos(x*omega[0]-phi[0])) | 0;
+			gg = 127*(1-Math.cos(x*omega[1]-phi[1])) | 0;
+			bb = 127*(1-Math.cos(x*omega[2]-phi[2])) | 0;
+			return 'rgba('+rr+','+gg+','+bb+','+aa+')';
 		},
 		ecolor: function(x, damp, offset, alpha, mn) {
 			offset = offset ? Array.isArray(offset) ? offset: [offset, offset, offset] : [0, 0, 0];
@@ -462,15 +353,6 @@ var common = function() {
 			var bb = u * b[0] + v * b[1] + w * b[2];
 			return 'rgba(' + Math.round(rr) + ',' + Math.round(gg) + ',' + Math.round(bb) + ',' + alpha + ')';
 		},
-		floorcolor : function(x,divider,offset,alpha) {
-			alpha = alpha || 1;
-			divArr	 = com.makearr(divider);
-			offsetArr = com.makearr(offset);
-			redpart = Math.floor(x*divArr[0] + offsetArr[0])*255/divArr[0];
-			bluepart= Math.floor(x*divArr[1] + offsetArr[1])*255/divArr[1];
-			greenpart= Math.floor(x*divArr[2] + offsetArr[2])*255/divArr[2];
-			return 'rgba('+redpart + ','+bluepart + ','+greenpart + ','+alpha+')';
-		},
 		sesmix: function(x, incoef, inminus, finalcoef, finalminus) {
 			incoef = incoef || [1, 1, 1];
 			finalcoef = finalcoef || [.33, .33, .33];
@@ -512,17 +394,6 @@ var common = function() {
 			var arr = [n(1, 0.1), n(0, 0.01), n(0, 0.01), n(0, 0.01), n(0, 0.1), n(1, 0.05), n(0, 0.01), n(0, 0.0001), n(0, 0.01), 0, 1, 0, 0, 0, 0, n(1, 0.2)];
 			var matrix = 'matrix3d(' + arr.join(',') + ')';
 			elem.css('transform', matrix);
-		},
-		centerDom: function(wrapperEl, targetEl) {
-			var wrapW = wrapperEl.width(),
-			wrapH = wrapperEl.height(),
-			tgtW = targetEl.width(),
-			tgtH = targetEl.height();
-
-			targetEl.css({
-				'left': - (tgtW - parseInt(wrapW, 10)) / 2 + 'px',
-				'top': - (tgtH - parseInt(wrapH, 10)) / 2 + 'px'
-			});
 		},
 		randomUnicode: function(a_num, a_min, a_max) {
 			var titlejjj = "";
@@ -591,34 +462,30 @@ var common = function() {
 			}
 			return res;
 		},
-		easyreplace: function(str, re, fn) {
-			var matchIndex = 0,
-			output = {
-				dict: {},
-				str: ''
-			},
+		easyreplace : function(str,re,fn) {
+			var matchIndex = 0,output={dict:{},str:''},
 			keyname;
 			re = re || /\b(\d+)(\.\d{1,})?\b/g;
-			fn = fn || function(match, index) {
-				return 'exr' + index;
+			fn = fn || function(match,index) {
+				return 'exr'+index;	
 			}
-			output.str = str.replace(re, function(match, p1) {
-				keyname = fn(match, matchIndex++);
+			output.str = str.replace(re,function(match,p1) {
+				keyname = fn(match,matchIndex++);
 				output.dict[keyname] = match;
-				return keyname;
+				return keyname;	
 			});
 			return output;
 		},
 		supercollidereasyrep: function(str) {
 			var repobj = com.easyreplace(str);
 			var output = 'arg ';
-			output += Object.keys(repobj.dict).map(function(item, index) {
-				return item + '=' + repobj.dict[item];
-			}).join(',');
-			output += ';\n';
-			output += repobj.str;
+			output += Object.keys(repobj.dict).map(function(item,index) {
+				return item+'='+repobj.dict[item];
+							}).join(',');
+			output+=';\n';
+			output+=repobj.str;
 			return output;
-
+			
 		},
 		strcode: function(str, mod, inbook, outbook, sep) {
 			// strcode takes a string input, and maps that
@@ -640,11 +507,11 @@ var common = function() {
 			eg: valfrombook('a') = 10
 					valfrombook('a1') = 10*64 + 1 = 641
 		*/
-		valfrombook: function(a_str, a_book, pad) {
+		valfrombook: function(a_str, a_book,pad) {
 			var book = a_book || "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-.";
 			var out = 0;
 			var spl = (a_str + "").split("");
-			pad = pad || - 1;
+			pad = pad || -1;
 			for (var i = 0; i < spl.length; i++) {
 				out = out * book.length + book.indexOf(spl[i]);
 			}
@@ -652,7 +519,7 @@ var common = function() {
 		},
 		frombook: function(val, book, pad) {
 			book = book || "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-.";
-			pad = pad || - 1;
+			pad = pad || -1;
 			var booklength = book.length;
 			var out = '';
 			var counter = val;
@@ -663,15 +530,15 @@ var common = function() {
 				counter /= booklength;
 			}
 			while (counter > 0);
-			while (out.length < pad) {
-				out = book[0] + out;
+			while(out.length < pad) {
+				out = book[0]+out;
 			}
 			return out;
 		},
-		repfart: function(input, corpus, sep) {
+		repfart: function(input,corpus,sep) {
 			corpus = corpus || com.lowercase.split('');
 			sep = sep || '';
-			return input.split('').map(function(item, index) {
+			return input.split('').map(function(item,index) {
 				return corpus[item % corpus.length];
 			}).join(sep);
 		},
@@ -992,32 +859,32 @@ var common = function() {
 				}
 			});
 		},
-		windowUtils: function(outerSelector, innerSelector) {
-			var windowStuff = {
-				width: 300,
-				height: 300,
-				outerwidth: 320,
-				outerheight: 320,
-				pixelRatio: 1,
-				scaledWidth: 120,
-				scaledHeight: 120,
-				target: outerSelector,
-				wssource: innerSelector,
-				source: window,
-				eventToTrigger: ('ontouchstart' in document.documentElement) ? 'touchstart': 'mousedown',
-				resized: function() {
-					windowStuff.width = $(windowStuff.wssource).width();
-					windowStuff.height = $(windowStuff.wssource).height();
-					windowStuff.outerwidth = $(windowStuff.source).width();
-					windowStuff.outerheight = $(windowStuff.source).height();
-					$(windowStuff.target).css('width', $(windowStuff.source).width());
-					$(windowStuff.target).css('height', $(windowStuff.source).height());
-					windowStuff.pixelRatio = 'devicePixelRatio' in window ? window.devicePixelRatio: 1;
-					windowStuff.scaledWidth = windowStuff.pixelRatio * windowStuff.outerwidth;
-					windowStuff.scaledHeight = windowStuff.pixelRatio * windowStuff.outerheight;
-				}
-			};
-			return windowStuff;
+		windowUtils : function(outerSelector,innerSelector) {
+var windowStuff = {
+	width: 300,
+	height: 300,
+	outerwidth: 320,
+	outerheight: 320,
+	pixelRatio: 1,
+	scaledWidth: 120,
+	scaledHeight: 120,
+	target: outerSelector,
+	wssource: innerSelector,
+	source: window,
+	eventToTrigger: ('ontouchstart' in document.documentElement) ? 'touchstart': 'mousedown',
+	resized: function() {
+		windowStuff.width = $(windowStuff.wssource).width();
+		windowStuff.height = $(windowStuff.wssource).height();
+		windowStuff.outerwidth = $(windowStuff.source).width();
+		windowStuff.outerheight = $(windowStuff.source).height();
+		$(windowStuff.target).css('width', $(windowStuff.source).width());
+		$(windowStuff.target).css('height', $(windowStuff.source).height());
+		windowStuff.pixelRatio = 'devicePixelRatio' in window ? window.devicePixelRatio: 1;
+		windowStuff.scaledWidth = windowStuff.pixelRatio * windowStuff.outerwidth;
+		windowStuff.scaledHeight = windowStuff.pixelRatio * windowStuff.outerheight;
+	}
+};
+return windowStuff;
 		},
 		intarray: function(arr, keys, offset) {
 			var out = [];
@@ -1396,39 +1263,11 @@ var common = function() {
 			ep: function(x, y, cx, cy, cr) {
 				return Math.exp( - com.num.len(x, y, cx, cy) / (cr || .0000001));
 			},
-			sinexp:function(x,y,cx,cy,omegas,cexp,phis) {
-				phis=phis||[0];
-				var sum=0,dist=Math.hypot(x-cx,y-cy),angle=Math.atan2(x-cx,y-cy);
-				sum=Math.exp(-dist/cexp);
-				var trigpart=0;
-				for(var i = 0; i < omegas.length; i++) {
-					trigpart+=Math.sin(omegas[i]*angle+phis[i%phis.length]);
-				}
-				return sum*trigpart;
-			},
 			// a+b*Math.pow(x,c)
-			polynomial: function(x, coefs) {
-				return coefs.reduce(function(acc, item, index) {
-					return acc + item * Math.pow(x, index);
-				},
-				0);
-			},
-			hsinpow:function(theta,pow) {
-				return Math.pow(Math.sin(theta/2),pow || 20);
-			},
-			sumprod:function() {
-				var sum=1,maxl=0;
-				for(var i = 0; i < arguments.length; i++) {
-						maxl = Math.max(maxl,arguments[i].length);
-					}
-				for(i = 0; i < maxl; i++) {
-					out=1;
-					for(j = 0; j < arguments.length; j++) {
-					out *= arguments[j][i % arguments[j].length];
-					}
-				sum+=out;
-				}
-			return sum;
+			polynomial:function(x,coefs) {
+				return coefs.reduce(function(acc,item,index) {
+					return acc + item*Math.pow(x,index);
+				},0);
 			},
 			// ss: Sin sum.  
 			ss: function(x, n) {
@@ -1535,13 +1374,13 @@ var common = function() {
 			conj: function(a) {
 				return [a[0], - a[1]];
 			},
-			abs: function(z) {
-				return Math.sqrt(z[0] * z[0] + z[1] * z[1]);
+			abs:function(z) {
+				return Math.sqrt(z[0]*z[0]+z[1]*z[1]);
 			},
-			mobius: function(z, a, b, c, d) {
-				var az = com.complex.mul(z, a);
-				var cz = com.complex.mul(z, c);
-				return com.complex.div(com.complex.add(az, b), com.complex.add(cz, d));
+			mobius:function(z,a,b,c,d) {
+				var az = com.complex.mul(z,a);
+				var cz = com.complex.mul(z,c);
+				return com.complex.div(com.complex.add(az,b),com.complex.add(cz,d));
 			},
 			zeta: function(sigma, tau, n) {
 				n = n || 8;
@@ -1673,29 +1512,27 @@ var common = function() {
 
 		},
 		fun: {
-			reparg: function(str, re, fn) {
+			reparg : function(str,re,fn) {
 				// reparg('sin(a+b)')(3,5) = 'sin(3+5)'
 				// reparg('sin(a+b)')(3) = 'sin(3+b)'
 				// reparg('sin(a+b)')('horsearphald',99) = 'sin(horsearphald+99)'
 				re = re || /\b[a-z]\b/g;
-				fn = fn || function(match, args) {
-					var intval = com.valfrombook(match, com.lowercase);
+				fn = fn || function(match,args) {
+					var intval = com.valfrombook(match,com.lowercase);
 					return args.hasOwnProperty(intval) ? args[intval] : match;
 				}
 				return function() {
 					var innerargs = arguments;
-					if (innerargs.length === 0) {
-						innerargs = 'abcdefghijklmnopqrstuvwxyz'.split('').map(function(item) {
-							return item + '_' + item
-						});
+					if(innerargs.length===0) {
+						innerargs = 'abcdefghijklmnopqrstuvwxyz'.split('').map(function(item) {return item+'_'+item});
 					}
-					var count = 0;
+					var count=0;
 					var lookup = {};
-					var replaced = str.replace(re, function(match) {
-						var replacedStuff = fn(match, innerargs, count);
+					var replaced = str.replace(re,function(match) {
+						var replacedStuff = fn(match,innerargs,count);
 						lookup[replacedStuff] = match;
 						count++;
-						return replacedStuff;
+						return replacedStuff;				
 					});
 					console.log(lookup);
 					return replaced;
@@ -1981,7 +1818,6 @@ var common = function() {
 		lowercase: 'abcdefghijklmnopqrstuvwxyz',
 		uppercase: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
 		b62: '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ',
-		b64: '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_',
 		b52: 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ',
 		b91: '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&*()`~-_=+[{]}|;:,<.>/?',
 		special: '-_=+]}[{\\|;:\'",<.>?',
@@ -2512,7 +2348,7 @@ var common = function() {
 		bk.add('ofs', function(o, f, s) {
 			return bk.map.afs(o, f, s);
 		});
-		bk.add('o', function(o) {
+		bk.add('o',function(o) {
 			return bk.map.afs(o);
 		});
 		bk.add('afs', function(funarr, blacklistFn, domID) {
@@ -2534,12 +2370,6 @@ var common = function() {
 						funarr[code] && funarr[code].apply(funarr[code]);
 					}
 				}
-			});
-		});
-		bk.add('sf',function(s,f) {
-			$(window).keyup(function(e) {
-				var lett=com.keyCodeToLower(e.keyCode);
-				f(lett,s);
 			});
 		});
 		bk.add('as', function(a, s) {
@@ -2602,8 +2432,8 @@ var common = function() {
 				pixel: 'ctx.fillColor="$c";\nctx.rect($a,$b,1,1);\nctx.fill();'
 			},
 			replaceVarsWithArrayVals: function(str, rgs) {
-				// takes a string like: "hi my name is $a", and an
-				// array like ["Scotty"], and returns "hi my name is Scotty"
+			// takes a string like: "hi my name is $a", and an
+			// array like ["Scotty"], and returns "hi my name is Scotty"
 				return str.replace(/\$([a-z])/g, function(match, first) {
 					var tokensIndex = com.valfrombook(first, com.lowercase);
 					return rgs[tokensIndex];

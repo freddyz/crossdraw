@@ -13,7 +13,7 @@ var Canvas = require('canvas')
   , canvas = Canvas.createCanvas(w, h)
   , ctx = canvas.getContext('2d');
 var rootdir = '/Users/adammalone/canvas/';
-var sin = Math.sin,cos=Math.cos,abs=Math.abs,random=Math.random,hypot=Math.hypot,atan2=Math.atan2,pow=Math.pow,exp=Math.exp,log=Math.log,PI=Math.PI,com=com.common();
+var sin = Math.sin,cos=Math.cos,abs=Math.abs,atan=Math.atan,random=Math.random,hypot=Math.hypot,atan2=Math.atan2,pow=Math.pow,exp=Math.exp,log=Math.log,PI=Math.PI,com=com.common();
 function sincolor(a_val, a_params, a_extrema, a_alpha) {
             var nr = 2,
             ng = 3,
@@ -293,6 +293,7 @@ function outLoop(num,fnName) {
 	filename,
     fn;
     
+    //set the globals
     nameGuts = prefix + '_' +timestamp + '_' + rndstring;
     filename = imgDir + '/'+nameGuts+'_';
 
@@ -326,7 +327,7 @@ function loop(inc,num,filenameLeft,fn) {
 	  }
 	});
 }
-function getLast() {
+function getLast(fn) {
     var cmd = '/Users/adammalone/canvas/catlastfunction';
     console.log(cmd);
     const ls = spawn('/Users/adammalone/canvas/catlastfunction');
@@ -334,7 +335,7 @@ function getLast() {
     ls.stdout.on('data', (data) => {
       console.log(`stdout: ${data}`);
       eval(`fun=${data}`);
-      outLoop(96);
+      fn();
     });
 
     ls.stderr.on('data', (data) => {
@@ -352,9 +353,19 @@ expressApp.use(bodyParser.json());
 expressApp.post('/', (req, res) => {
     var functionString = req.body.functionString;
     console.log(functionString);
-    functionString && eval(functionString);
-    res.send('Going to loop this: '+functionString);
-    outLoop(96,'fun');
+    if(functionString) {
+        eval(functionString)
+        res.send('Going to loop this: '+functionString);
+        outLoop(96,'fun');
+    }
+    else {
+        res.send('no functionString');
+        getLast(function() {
+            //res.send('shoulda gotten last');
+            outLoop(96,'fun');
+        })
+    }
+
 })
 expressApp.listen(port, () => console.log(`Example app listening on port ${port}!`));
 }
