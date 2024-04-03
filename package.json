@@ -1,21 +1,21 @@
 {
-  "name": "excrossdraw",
-  "version": "1.0.0",
-  "description": "automation for crossdraw",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js serve"
-  },
-  "author": "computerscare",
-  "license": "ISC",
-  "dependencies": {
-    "body-parser": "^1.18.3",
-    "canvas": "^2.2.0",
-    "child_process": "^1.0.2",
-    "dateformat": "^3.0.3",
-    "express": "^4.16.4",
-    "fs-extra": "^7.0.1",
-    "prettier": "^3.1.1"
-  }
+	"name": "excrossdraw",
+	"version": "1.0.0",
+	"description": "automation for crossdraw",
+	"main": "index.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"start": "node index.js serve"
+	},
+	"author": "computerscare",
+	"license": "ISC",
+	"dependencies": {
+		"body-parser": "^1.18.3",
+		"canvas": "^2.2.0",
+		"child_process": "^1.0.2",
+		"dateformat": "^3.0.3",
+		"express": "^4.16.4",
+		"fs-extra": "^7.0.1",
+		"prettier": "^3.1.1"
+	}
 }
