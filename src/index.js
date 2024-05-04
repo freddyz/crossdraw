@@ -9,10 +9,17 @@ var fs = require("fs-extra"),
 	spawn = require("child_process").spawn,
 	com = require("./js/common.js"),
 	dateFormat = require("dateformat");
+
+const path = require("path");
+
 var Canvas = require("canvas"),
 	Image = Canvas.Image;
 
 const worker = require("node:worker_threads");
+
+const absolutePathRoot = path.resolve("");
+
+console.log({ absolutePathRoot });
 
 var rootdir = "/Users/adammalone/canvas/";
 var sin = Math.sin,
@@ -232,119 +239,18 @@ function randomString(a_length, corpus) {
 	return out;
 }
 
-function spiral(ctx, inc) {
-	var a, b, c, d, e, f, g, i, j, k, l, m, n, o, p, q, r, s, t, u, v, x, y, z;
-	for (x = 0; x < w; x++) {
-		for (y = 0; y < h; y++) {
-			r = Math.hypot(x - 250, y - 250);
-			t = Math.atan2(x - 250, y - 250);
-			a = r / 6.28 + t;
-			b = x + t;
-			c = y;
-			d = x + t;
-			e = x + y;
-			f = a;
-			ctx.fillStyle = sincolor(a, [1, 1, 1]);
-			ctx.fillRect(x, y, 1, 1);
-		}
-	}
-}
+const genDir = path.join(absolutePathRoot, "gen");
+//const imgDir = path.join(genDir, "images");
+const imgDir = path.join(absolutePathRoot, "gen", "images");
 
-function fun(
-	ctx,
-	inc,
-	A,
-	B,
-	C,
-	D,
-	E,
-	F,
-	G,
-	H,
-	I,
-	J,
-	K,
-	L,
-	M,
-	N,
-	O,
-	P,
-	Q,
-	R,
-	S,
-	T,
-	U,
-	V,
-	W,
-	X,
-	Y,
-	Z,
-) {
-	var a,
-		b,
-		c,
-		d,
-		e,
-		f,
-		g,
-		h,
-		i,
-		j,
-		k,
-		l,
-		m,
-		n,
-		o,
-		p,
-		q,
-		r,
-		s,
-		t,
-		u,
-		v,
-		w,
-		x,
-		y,
-		z,
-		ni = 100,
-		nx = 500,
-		ny = 500;
-	(rra = Math.random()),
-		(rrb = Math.random()),
-		(rrc = Math.random()),
-		(rrd = Math.random()),
-		(rre = Math.random());
-	rrf = Math.random();
-	rrg = Math.random();
-	for (x = 0; x < nx; x++) {
-		for (y = 0; y < ny; y++) {
-			r = Math.hypot(x - 250, y - 250);
-			t = Math.atan2(x - 250, y - 250);
-			a = 0;
-			b = 0;
-			c = 0;
-			d = 8;
-			e = sin(
-				inc +
-					5 *
-						exp(
-							sin(r / 30 + inc) +
-								sin(t * 4 + inc + 2 * sin(t * 4 - inc - r / 22)),
-						) -
-					inc,
-			);
-			f = rgb(255 * (1 - e));
-			ctx.fillStyle = f;
-			ctx.fillRect(x, y, 1, 1);
-		}
-	}
-}
-
-var imgDir = "images";
 var postFix = ".png";
 var nameGuts = "";
 function allDone() {
-	const ls = spawn("./timtv", [imgDir, nameGuts, fun.toString()]);
+	const ls = spawn(path.join(absolutePathRoot, "src", "timtv"), [
+		genDir,
+		nameGuts,
+		fun.toString(),
+	]);
 
 	ls.stdout.on("data", (data) => {
 		console.log(`stdout: ${data}`);
@@ -358,92 +264,9 @@ function allDone() {
 		console.log(`child process exited with code ${code}`);
 	});
 }
-//monkeydraw assumes these paramters are sent with random values
-function monkeydraw(
-	ctx,
-	inc,
-	rra,
-	rrb,
-	rrc,
-	rrd,
-	rre,
-	rrf,
-	rrg,
-	rrh,
-	rri,
-	rrj,
-	rrk,
-	rrl,
-	rrm,
-	rrn,
-) {
-	var a,
-		b,
-		c,
-		d,
-		e,
-		f,
-		g,
-		h,
-		i,
-		j,
-		k,
-		l,
-		m,
-		n,
-		o,
-		p,
-		q,
-		r,
-		s,
-		t,
-		u,
-		v,
-		w,
-		x,
-		y,
-		z,
-		ni = 100,
-		nx = 300,
-		ny = 5;
-	ctx.strokeStyle = sincolor(rrf * 22);
-	ctx.clearRect(0, 0, 4000, 4000);
-	ctx.beginPath();
-	var xx, yy;
-	nx = Math.floor(Math.random() * 1000);
-
-	var omega = [rra, rrb, rrc].map(function (item) {
-		return Math.floor(item * 17);
-	});
-	var phi = [rrd, rre, rrf].map(function (item) {
-		return 2 * Math.PI * item;
-	});
-	var k = [rra, (rrf + rrb) / 2, (rre - rrc) / 2].map(function (item) {
-		return 3 - Math.floor(item * 5);
-	});
-	for (x = 0; x < nx; x++) {
-		var xp = x / nx;
-		var xt = 2 * Math.PI * xp;
-		r = omega.reduce(function (last, item, dex) {
-			return last + 10 * Math.sin(item * xt + phi[dex] + inc * k[dex]);
-		}, 100);
-		xx = 250 + r * Math.cos(xt);
-		yy = 250 + r * Math.sin(xt);
-		if (x === 0) {
-			ctx.lineTo(xx, yy);
-		} else {
-			ctx.lineTo(xx, yy);
-		}
-	}
-	ctx.closePath();
-	ctx.stroke();
-}
-
-//fun is the default running mode.  paste the crossdraw functions in here
 
 function findfun(fnName) {
 	var argmap = {
-		r: monkeydraw,
 		f: fun,
 	};
 	var arg = args[2];

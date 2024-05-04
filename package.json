@@ -5,7 +5,8 @@
 	"main": "index.js",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
-		"start": "node index.js serve"
+		"start": "node index.js serve",
+		"monitor-server": "nodemon --ignore 'gen/*' --exec \"node src/index.js serve\""
 	},
 	"author": "computerscare",
 	"license": "ISC",
@@ -16,6 +17,7 @@
 		"dateformat": "^3.0.3",
 		"express": "^4.16.4",
 		"fs-extra": "^7.0.1",
+		"nodemon": "^3.1.0",
 		"prettier": "^3.1.1"
 	}
 }

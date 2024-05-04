@@ -1,0 +1,24 @@
+#!/bin/bash
+
+#combine all the images into a gif and a mp4
+
+# $2 is the name of the file, $1 is the gen directory
+
+
+
+genDir=$1;
+imgNameBase=$2;
+
+imagesDir="$genDir/images";
+
+
+echo "Starting ./timtv";
+echo "arg1: $1";
+echo "arg2: $2";
+
+ffmpeg_path=$(which ffmpeg)
+$ffmpeg_path -f image2 -i $1/images/$2_%d.png $1/gifs/$2.gif
+$ffmpeg_path -f image2 -i $1/images/$2_%d.png -vcodec libx264 -s 500x500 -pix_fmt yuv420p $1/movs/$2.mp4
+cp $1/images/$2_0.png $1/coverimages/$2.png
+rm -f $1/images/$2_*
+echo $3 > $1/cdr-functions/$2.js
