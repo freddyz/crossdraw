@@ -1,5 +1,7 @@
 #!/bin/bash
 
+#combine all the images into a gif and a mp4
+
 # $2 is the name of the file, $1 is the images directory
 
 
