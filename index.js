@@ -10,9 +10,10 @@ var fs = require("fs-extra"),
 	com = require("./js/common.js"),
 	dateFormat = require("dateformat");
 var Canvas = require("canvas"),
-	Image = Canvas.Image,
-	canvas = Canvas.createCanvas(w, h),
-	ctx = canvas.getContext("2d");
+	Image = Canvas.Image;
+
+const worker = require("node:worker_threads");
+
 var rootdir = "/Users/adammalone/canvas/";
 var sin = Math.sin,
 	cos = Math.cos,
@@ -101,6 +102,9 @@ function rgb(r, g, b, a) {
 		a +
 		")"
 	);
+}
+function hsl(h, s, l) {
+	return com.hsl(h, s, l);
 }
 function ss(x, n) {
 	var out = 0;
@@ -434,123 +438,6 @@ function monkeydraw(
 	ctx.closePath();
 	ctx.stroke();
 }
-function fun2(ctx, inc) {
-	var a,
-		b,
-		c,
-		d,
-		e,
-		f,
-		g,
-		h,
-		i,
-		j,
-		k,
-		l,
-		m,
-		n,
-		o,
-		p,
-		q,
-		r,
-		s,
-		t,
-		u,
-		v,
-		w,
-		x,
-		y,
-		z,
-		ni = 100,
-		nx = 500,
-		ny = 500;
-	(rra = Math.random()),
-		(rrb = Math.random()),
-		(rrc = Math.random()),
-		(rrd = Math.random()),
-		(rre = Math.random());
-	rrf = Math.random();
-	rrg = Math.random();
-	for (x = 0; x < nx; x++) {
-		for (y = 0; y < ny; y++) {
-			r = Math.hypot(x - 250, y - 250);
-			t = Math.atan2(x - 250, y - 250);
-			a = x;
-			b = y;
-			c = 0;
-			d =
-				6 * sin(inc + r / (22 + sin(2 * inc - r / 29 - t))) +
-				2 * sin(y / 31 + x / 12 + inc);
-			e =
-				sin(x / (20 + y / (30 + r / (22 + d * sin(t + inc))))) +
-				sin(y / 20 + inc);
-			f = sincolor(e * 10 + 3 * 82, [1, 1, 1]);
-			ctx.fillStyle = f;
-			ctx.fillRect(x, y, 1, 1);
-		}
-	}
-}
-//monkeydraw assumes these paramters are sent with random values
-function monkeydraw2(
-	ctx,
-	inc,
-	aa,
-	ab,
-	ac,
-	ad,
-	ae,
-	af,
-	ag,
-	ah,
-	ai,
-	aj,
-	ak,
-	al,
-	am,
-) {
-	var a,
-		b,
-		c,
-		d,
-		e,
-		f,
-		g,
-		h,
-		i,
-		j,
-		k,
-		l,
-		m,
-		n,
-		o,
-		p,
-		q,
-		r,
-		s,
-		t,
-		u,
-		v,
-		w,
-		x,
-		y,
-		z;
-	for (x = 0; x < 500; x++) {
-		for (y = 0; y < 500; y++) {
-			r = Math.hypot(x - 250, y - 250);
-			t = Math.atan2(x - 250, y - 250);
-			a = inc;
-			b = sin(a + t);
-			c = sin(2 * a - 1 - 2 * t);
-			d =
-				sin(aa * t - ab * a + ac * sin(ad * t - ae * a)) +
-				sin(af * t - ag * a + ah * sin(ai * t - aj * a));
-			e = r - 120 - 40 * d;
-			f = sigcolor(-e, [1 + ak * ak, 1 + al * al, 1 + am * am]);
-			ctx.fillStyle = f;
-			ctx.fillRect(x, y, 1, 1);
-		}
-	}
-}
 
 //fun is the default running mode.  paste the crossdraw functions in here
 
@@ -562,12 +449,14 @@ function findfun(fnName) {
 	var arg = args[2];
 	arg = fnName;
 	var funToUse = arg && argmap.hasOwnProperty(arg) ? argmap[arg] : fun;
-	var rp = [];
+
+	// the A-Z uppercase uniform values
+	var randomParameters = [];
 	for (var i = 0; i < 26; i++) {
-		rp.push(Math.random());
+		randomParameters.push(Math.random());
 	}
 	return function (ctx, inc) {
-		return funToUse.apply(null, [ctx, inc].concat(rp));
+		return funToUse.apply(null, [ctx, inc].concat(randomParameters));
 	};
 }
 
@@ -586,8 +475,46 @@ function outLoop(num, fnName) {
 	fn = findfun(fnName);
 
 	//fn = fun;
-	loop(0, num, filename, fn);
+	//	loop(0, num, filename, fn);
+
+	const indices = Array.from(Array(num)).map((x, index) => index);
+
+	const promises = indices.map((x) => {
+		return drawFrame(x, num, filename, fn);
+	});
+
+	Promise.all(promises).then((res) => {
+		allDone();
+	});
 }
+
+const drawFrame = (inc, num, filenameLeft, fn) => {
+	return new Promise((resolve, reject) => {
+		var filename = filenameLeft + inc + ".png";
+
+		const canvas = Canvas.createCanvas(w, h);
+		const ctx = canvas.getContext("2d");
+
+		var out = fs.createWriteStream(filename),
+			stream = canvas.pngStream();
+
+		const trigArg = (inc * 2 * Math.PI) / num;
+		console.log({ trigArg });
+
+		fn(ctx, trigArg);
+
+		stream.on("data", function (chunk) {
+			out.write(chunk);
+		});
+
+		stream.on("end", function () {
+			console.log("saved " + filename);
+			resolve();
+		});
+
+		stream.on("error", reject);
+	});
+};
 
 function loop(inc, num, filenameLeft, fn) {
 	//var timestamp = dateFormat(now, "dddd, mmmm dS, yyyy, h:MM:ss TT");
