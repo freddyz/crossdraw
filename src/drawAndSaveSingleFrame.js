@@ -139,7 +139,13 @@ function multiSeed(num, fn) {
 	return out;
 }
 
-const drawFrame = (inc, num, filenameLeft, functionDefAsString) => {
+const drawFrame = (
+	inc,
+	num,
+	filenameLeft,
+	functionDefAsString,
+	randomParameters,
+) => {
 	return new Promise((resolve, reject) => {
 		eval(functionDefAsString);
 
@@ -154,7 +160,7 @@ const drawFrame = (inc, num, filenameLeft, functionDefAsString) => {
 		const trigArg = (inc * 2 * Math.PI) / num;
 		console.log(`drawing frame ${inc}/${num}`);
 
-		fun(ctx, trigArg);
+		fun.apply(null, [ctx, trigArg].concat(randomParameters));
 
 		stream.on("data", function (chunk) {
 			out.write(chunk);

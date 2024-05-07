@@ -8,13 +8,14 @@ var fs = require("fs-extra"),
 	com = require("./js/common.js"),
 	dateFormat = require("dateformat");
 
+const {
+	Worker,
+	isMainThread,
+	parentPort,
+	workerData,
+} = require("node:worker_threads");
+
 const path = require("path");
-
-var Canvas = require("canvas"),
-	Image = Canvas.Image;
-
-const worker = require("node:worker_threads");
-
 const { drawFrame } = require("./drawAndSaveSingleFrame.js");
 
 const absolutePathRoot = path.resolve("");
@@ -23,85 +24,6 @@ console.log({ absolutePathRoot });
 
 var rootdir = "/Users/adammalone/canvas/";
 
-function sff(ctx, valfn, colorfn) {
-	for (var i = 0; i < w; i++) {
-		for (var j = 0; j < h; j++) {
-			var val = valfn.call(null, i, j);
-			ctx.fillStyle = colorfn.call(null, val);
-			ctx.fillRect(i, j, 1, 1);
-		}
-	}
-}
-
-function ss(x, n) {
-	var out = 0;
-	for (var i = 1; i <= n; i++) {
-		out += Math.sin(i * x);
-	}
-	return out;
-}
-function sinest(x, arr, phi, amp, fn) {
-	arr = arr || [1];
-	phi = phi || [0];
-	amp = amp || [1];
-	fn = fn || Math.sin;
-	var out = 0;
-	for (var i = Math.max(arr.length, phi.length) - 1; i >= 0; i--) {
-		out = fn.call(
-			null,
-			x * arr[i % arr.length] - phi[i % phi.length] + amp[i % amp.length] * out,
-			i,
-			arr,
-			phi,
-			out,
-		);
-	}
-	return out;
-}
-function sinsum(x, omega, phi, amp, fn) {
-	omega = omega || [1];
-	phi = phi || [0];
-	amp = amp || [1];
-	fn = fn || Math.sin;
-	var out = 0;
-	for (var i = 0; i < Math.max(omega.length, phi.length, amp.length); i++) {
-		out +=
-			amp[i % amp.length] *
-			fn.call(
-				null,
-				x * omega[i % omega.length] - phi[i % phi.length],
-				i,
-				omega,
-				phi,
-				amp,
-				out,
-			);
-	}
-	return out;
-}
-
-function hcolor(x, damp, offset, alpha, minmax) {}
-function sinest(x, arr) {
-	arr = arr || [1];
-	if (arr.length === 1) {
-		return Math.sin(x / arr[0]);
-	} else {
-		return Math.sin(x / arr.shift() + sinest(x, arr));
-	}
-}
-function multiSeed(num, fn) {
-	var out = [];
-	num = num || 20;
-	fn =
-		fn ||
-		function (dex, num, prev) {
-			return 0.5 - Math.random();
-		};
-	for (var i = 0; i < num; i++) {
-		out.push(fn.call(null, i, num, out));
-	}
-	return out;
-}
 function randomString(a_length, corpus) {
 	(corpus =
 		corpus || "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"),
@@ -156,6 +78,14 @@ function findfun(fnName) {
 	};
 }
 
+function makeRandomParameters() {
+	var randomParameters = [];
+	for (var i = 0; i < 26; i++) {
+		randomParameters.push(Math.random());
+	}
+	return randomParameters;
+}
+
 function outLoop(num, functionDefAsString) {
 	var now = new Date(),
 		prefix = "cdr",
@@ -175,12 +105,32 @@ function outLoop(num, functionDefAsString) {
 
 	const indices = Array.from(Array(num)).map((x, index) => index);
 
+	const randomParameters = makeRandomParameters();
+
 	const promises = indices.map((x) => {
-		return drawFrame(x, num, filename, functionDefAsString);
+		//	return spawnWorker(x, num, filename, functionDefAsString);
+		return drawFrame(x, num, filename, functionDefAsString, randomParameters);
 	});
 
 	Promise.all(promises).then((res) => {
 		allDone(functionDefAsString);
+	});
+}
+
+function spawnWorker(index, num, filename, functionDefAsString) {
+	return new Promise((resolve, reject) => {
+		const worker = new Worker(
+			path.join(absolutePathRoot, "src", "workerDrawWrapper.js"),
+			{
+				workerData: { index, num, filename, functionDefAsString },
+			},
+		);
+		worker.on("message", resolve);
+		worker.on("error", reject);
+		worker.on("exit", (code) => {
+			if (code !== 0)
+				reject(new Error(`Worker stopped with exit code ${code}`));
+		});
 	});
 }
 
